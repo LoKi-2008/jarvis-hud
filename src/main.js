@@ -14,6 +14,7 @@ import { speak } from "./voice/speak.js";
 import { gestures } from "./gestures/recognizer.js";
 import { runCalibration } from "./gestures/calibration.js";
 import { toast } from "./hud/toasts.js";
+import { HoloScene } from "./holograms/scene.js";
 
 const camera = new Camera();
 const vision = new VisionEngine();
@@ -22,6 +23,7 @@ const hud = new HudOverlay();
 const fx = new FxPass();
 const quality = new QualityGovernor();
 const fps = new FpsMeter();
+const holo = new HoloScene();
 
 export const live = { frame: null };
 let latestFrame = null;
@@ -49,6 +51,7 @@ function render(t) {
   fx.draw(camera.video, t, quality.level);
   hud.draw(t, latestFrame);
   debug.draw(latestFrame, { fps: f, quality: quality.label });
+  holo.render(latestFrame, quality, t);
 }
 
 async function bootVision() {
