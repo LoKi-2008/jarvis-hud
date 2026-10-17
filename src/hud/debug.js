@@ -63,8 +63,15 @@ export class DebugOverlay {
       20,
       32
     );
-    const g = frame.gestures.map((x) => `${x.name}:${(x.score * 100).toFixed(0)}`).join("  ");
+    const g = (frame.gestureEvents || frame.gestures)
+      .map((x) => `${x.name}:${((x.score || 0) * 100).toFixed(0)}`)
+      .join("  ");
     ctx.fillText(g || "gesture —", 20, 50);
+    const pin = frame.hands
+      .filter((h) => h._pinch?.active)
+      .map((h) => `PINCH ${h.handedness}`)
+      .join("  ");
+    if (pin) ctx.fillText(pin, 20, 66);
     ctx.restore();
   }
 }

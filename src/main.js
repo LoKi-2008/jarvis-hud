@@ -11,6 +11,9 @@ import { appState } from "./state.js";
 import { CONFIG } from "./config.js";
 import { sfx } from "./audio/sfx.js";
 import { speak } from "./voice/speak.js";
+import { gestures } from "./gestures/recognizer.js";
+import { runCalibration } from "./gestures/calibration.js";
+import { toast } from "./hud/toasts.js";
 
 const camera = new Camera();
 const vision = new VisionEngine();
@@ -20,7 +23,9 @@ const fx = new FxPass();
 const quality = new QualityGovernor();
 const fps = new FpsMeter();
 
+export const live = { frame: null };
 let latestFrame = null;
+let handsWereOn = false;
 
 function fitCanvases() {
   const w = window.innerWidth;
@@ -62,6 +67,11 @@ async function bootVision() {
   document.title = "J.A.R.V.I.S.";
   vision.onFrame = (frame) => {
     latestFrame = frame;
+    live.frame = frame;
+    gestures.update(frame);
+    const handsOn = frame.hands.some((h) => h.present);
+    if (handsWereOn && !handsOn) toast("Tracking lost", "warn");
+    handsWereOn = handsOn;
     bus.emit("vision", frame);
   };
   vision.start(camera.video);
@@ -107,6 +117,8 @@ async function main() {
     sfx.unlock();
     await playBoot({ hud, speak });
     appState.booted = true;
+    await runCalibration(() => live.frame);
+    toast("Calibration complete");
   } catch {
     /* permission overlay already visible */
   }
