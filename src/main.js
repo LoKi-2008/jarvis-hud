@@ -1,37 +1,37 @@
 import { Camera } from "./vision/camera.js";
 import { VisionEngine } from "./vision/engine.js";
 import { DebugOverlay } from "./hud/debug.js";
+import { HudOverlay } from "./hud/overlay.js";
+import { FxPass } from "./hud/fxPass.js";
+import { playBoot } from "./hud/boot.js";
 import { QualityGovernor } from "./quality.js";
 import { FpsMeter } from "./utils/fps.js";
 import { bus } from "./utils/bus.js";
 import { appState } from "./state.js";
 import { CONFIG } from "./config.js";
+import { sfx } from "./audio/sfx.js";
+import { speak } from "./voice/speak.js";
 
 const camera = new Camera();
 const vision = new VisionEngine();
 const debug = new DebugOverlay();
+const hud = new HudOverlay();
+const fx = new FxPass();
 const quality = new QualityGovernor();
 const fps = new FpsMeter();
 
 let latestFrame = null;
-let renderRaf = 0;
 
 function fitCanvases() {
   const w = window.innerWidth;
   const h = window.innerHeight;
   debug.resize(w, h);
-  const hud = document.getElementById("hud");
-  const fx = document.getElementById("fx");
-  for (const c of [hud, fx]) {
-    if (c.width !== w || c.height !== h) {
-      c.width = w;
-      c.height = h;
-    }
-  }
+  hud.resize(w, h);
+  fx.resize(w, h);
 }
 
 function render(t) {
-  renderRaf = requestAnimationFrame(render);
+  requestAnimationFrame(render);
   const f = fps.tick(t);
   appState.fps = f;
   quality.update(f);
@@ -41,6 +41,8 @@ function render(t) {
     latestFrame.light = camera.sampleLight(t);
     latestFrame.quality = quality.label;
   }
+  fx.draw(camera.video, t, quality.level);
+  hud.draw(t, latestFrame);
   debug.draw(latestFrame, { fps: f, quality: quality.label });
 }
 
@@ -66,8 +68,10 @@ async function bootVision() {
 }
 
 function bindKeys() {
+  window.addEventListener("pointerdown", () => sfx.unlock(), { once: true });
   window.addEventListener("keydown", (e) => {
     if (e.target instanceof HTMLInputElement) return;
+    sfx.unlock();
     if (e.key === "d" || e.key === "D") {
       appState.debug = !appState.debug;
       document.getElementById("opt-debug").checked = appState.debug;
@@ -76,12 +80,14 @@ function bindKeys() {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
       else document.exitFullscreen().catch(() => {});
     }
+    if (e.key === "m" || e.key === "M") appState.muted = !appState.muted;
   });
   document.getElementById("opt-debug").addEventListener("change", (e) => {
     appState.debug = e.target.checked;
   });
   document.getElementById("settings-btn").addEventListener("click", () => {
     document.getElementById("settings").classList.toggle("hidden");
+    sfx.unlock();
   });
   document.getElementById("retry-cam").addEventListener("click", () => {
     bootVision().catch(() => {});
@@ -91,12 +97,16 @@ function bindKeys() {
 async function main() {
   appState.debug = true;
   document.getElementById("opt-debug").checked = true;
+  hud.bootT = 0;
   fitCanvases();
   window.addEventListener("resize", fitCanvases);
   bindKeys();
-  render(performance.now());
+  requestAnimationFrame(render);
   try {
     await bootVision();
+    sfx.unlock();
+    await playBoot({ hud, speak });
+    appState.booted = true;
   } catch {
     /* permission overlay already visible */
   }
@@ -104,4 +114,4 @@ async function main() {
 
 main();
 
-export { camera, vision, quality, CONFIG };
+export { camera, vision, quality, hud, latestFrame, CONFIG };

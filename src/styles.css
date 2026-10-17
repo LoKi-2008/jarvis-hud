@@ -39,9 +39,8 @@ body {
 
 #cam {
   object-fit: cover;
-  transform: scaleX(-1);
-  filter: saturate(0.55) contrast(1.15) brightness(0.55) hue-rotate(165deg);
-  opacity: 0.72;
+  opacity: 0;
+  pointer-events: none;
 }
 
 #fx,
