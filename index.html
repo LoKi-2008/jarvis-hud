@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>J.A.R.V.I.S.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="stage">
+      <video id="cam" playsinline muted></video>
+      <canvas id="fx"></canvas>
+      <div id="three"></div>
+      <canvas id="hud"></canvas>
+      <canvas id="debug"></canvas>
+      <div id="boot" class="overlay hidden">
+        <div class="reactor" id="reactor"></div>
+        <div id="boot-log"></div>
+      </div>
+      <div id="calibrate" class="overlay hidden">
+        <div class="panel-title">HAND CALIBRATION</div>
+        <p>Hold both palms open toward the camera.</p>
+        <div id="cal-bar"><span></span></div>
+        <div id="cal-stats"></div>
+      </div>
+      <div id="perm" class="overlay hidden">
+        <h1>CAMERA REQUIRED</h1>
+        <p>J.A.R.V.I.S. is vision-driven. Allow webcam access and reload.</p>
+        <button id="retry-cam" type="button">RETRY</button>
+      </div>
+      <div id="toasts"></div>
+      <form id="cmd-form" class="hidden">
+        <span>CMD</span>
+        <input id="cmd-input" autocomplete="off" spellcheck="false" placeholder="jarvis, systems online" />
+      </form>
+      <button id="settings-btn" type="button" title="Settings">⚙</button>
+      <aside id="settings" class="hidden">
+        <h2>SYSTEMS</h2>
+        <label><input type="checkbox" id="opt-coco" /> Object detection (COCO-SSD)</label>
+        <label><input type="checkbox" id="opt-debug" /> Debug overlay</label>
+        <label>LLM endpoint <input id="opt-llm-url" placeholder="https://api.openai.com/v1/chat/completions" /></label>
+        <label>LLM API key <input id="opt-llm-key" type="password" /></label>
+        <button id="enroll-face" type="button">Enroll this face</button>
+        <input id="enroll-name" placeholder="Name" />
+        <input id="glb-file" type="file" accept=".glb,.gltf" />
+        <p class="hint">Keys 1–7 modes · D debug · F fullscreen · / command · M mute</p>
+      </aside>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

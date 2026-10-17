@@ -1,0 +1,21 @@
+{
+  "name": "jarvis-hud",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "setup:models": "node scripts/fetch-models.js"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "0.10.21",
+    "@tensorflow-models/coco-ssd": "^2.2.3",
+    "@tensorflow/tfjs": "^4.22.0",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  }
+}

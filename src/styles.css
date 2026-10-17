@@ -1,0 +1,237 @@
+:root {
+  --cyan: #00e5ff;
+  --amber: #ffb300;
+  --red: #ff1744;
+  --bg: #02040a;
+  font-family: "Share Tech Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--cyan);
+  overflow: hidden;
+}
+
+#stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, #03111f 0%, #000 70%);
+}
+
+#cam,
+#fx,
+#hud,
+#debug,
+#three {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#cam {
+  object-fit: cover;
+  transform: scaleX(-1);
+  filter: saturate(0.55) contrast(1.15) brightness(0.55) hue-rotate(165deg);
+  opacity: 0.72;
+}
+
+#fx,
+#hud,
+#debug {
+  pointer-events: none;
+}
+
+#three {
+  pointer-events: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(1, 4, 12, 0.72);
+  z-index: 20;
+  text-align: center;
+  gap: 16px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.reactor {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 2px solid var(--cyan);
+  box-shadow:
+    0 0 24px var(--cyan),
+    inset 0 0 40px var(--cyan);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+#boot-log {
+  min-height: 8em;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 8px var(--cyan);
+}
+
+#cal-bar {
+  width: min(420px, 70vw);
+  height: 6px;
+  border: 1px solid var(--cyan);
+}
+#cal-bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+#toasts {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.toast {
+  border: 1px solid var(--cyan);
+  padding: 8px 14px;
+  background: rgba(0, 20, 32, 0.8);
+  animation: glitch 0.4s linear;
+}
+
+.toast.warn {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.toast.alert {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+@keyframes glitch {
+  0% {
+    transform: translate(2px, 0);
+    opacity: 0;
+  }
+  40% {
+    transform: translate(-2px, 0);
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+#cmd-form {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  z-index: 25;
+  background: rgba(0, 12, 24, 0.75);
+  border: 1px solid var(--cyan);
+  padding: 8px 12px;
+}
+
+#cmd-form input {
+  width: min(520px, 60vw);
+  background: transparent;
+  border: 0;
+  color: var(--cyan);
+  font: inherit;
+  outline: none;
+}
+
+#settings-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 26;
+  background: transparent;
+  color: var(--cyan);
+  border: 1px solid var(--cyan);
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+}
+
+#settings {
+  position: absolute;
+  top: 58px;
+  right: 14px;
+  z-index: 26;
+  width: 280px;
+  background: rgba(2, 8, 18, 0.92);
+  border: 1px solid var(--cyan);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+}
+
+#settings input[type="text"],
+#settings input[type="password"],
+#settings input:not([type]) {
+  width: 100%;
+  background: #000;
+  border: 1px solid #034;
+  color: var(--cyan);
+  padding: 4px;
+}
+
+#settings .hint {
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+#perm button,
+#settings button {
+  background: transparent;
+  color: var(--cyan);
+  border: 1px solid var(--cyan);
+  padding: 8px 12px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.panel-title {
+  letter-spacing: 0.4em;
+  font-family: Orbitron, sans-serif;
+}
