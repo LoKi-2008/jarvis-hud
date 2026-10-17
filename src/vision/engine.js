@@ -11,12 +11,14 @@ import { LandmarkSmoother } from "../utils/oneEuro.js";
 import { clamp } from "../utils/math.js";
 import { createVisionFrame } from "./frame.js";
 
-const WASM = "/wasm";
+const BASE = import.meta.env.BASE_URL || "/";
+const cleanBase = BASE.endsWith("/") ? BASE : `${BASE}/`;
+const WASM = `${cleanBase}wasm`;
 const MODELS = {
-  hand: "/models/hand_landmarker.task",
-  face: "/models/face_landmarker.task",
-  pose: "/models/pose_landmarker_lite.task",
-  gesture: "/models/gesture_recognizer.task",
+  hand: `${cleanBase}models/hand_landmarker.task`,
+  face: `${cleanBase}models/face_landmarker.task`,
+  pose: `${cleanBase}models/pose_landmarker_lite.task`,
+  gesture: `${cleanBase}models/gesture_recognizer.task`,
 };
 
 export class VisionEngine {
