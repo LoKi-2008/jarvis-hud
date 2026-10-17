@@ -46,7 +46,9 @@ export class VoiceListener {
       };
 
       this.recognition.onerror = (e) => {
-        if (e.error !== "no-speech") {
+        if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+          toast("Microphone denied. Voice fallen back to text bar ('/')", "warn");
+        } else if (e.error !== "no-speech") {
           console.warn("Speech error:", e.error);
         }
       };
