@@ -91,6 +91,17 @@ export const CONFIG = {
     minConfidence: 0.45,
   },
 
+  tools: {
+    objectScale: 0.35,
+    grabDistance: 0.35,
+    explodeDistance: 0.45,
+    drawMinDist: 0.012,
+    drawMaxPoints: 2000,
+    radialRadius: 110,
+    radialInnerRadius: 38,
+    measureScaleCm: 18.0,
+  },
+
   weather: {
     lat: 28.6139,
     lon: 77.209,

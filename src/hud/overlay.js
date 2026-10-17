@@ -1,3 +1,5 @@
+import { voiceWaveform } from "../voice/waveform.js";
+import { recorder } from "../tools/recorder.js";
 import { MODE_META } from "../config.js";
 import { appState } from "../state.js";
 import { clamp } from "../utils/math.js";
@@ -27,6 +29,11 @@ export class HudOverlay {
     this.alpha = 1;
     this.trans = 0;
     this.pulse = 0;
+    this.tools = null;
+  }
+
+  setTools(tools) {
+    this.tools = tools;
   }
 
   resize(w, h) {
@@ -77,6 +84,11 @@ export class HudOverlay {
       this.trans *= 0.9;
     }
     if (frame?.light < 0.18) this.lowLight(ctx, w, h);
+    voiceWaveform.update();
+    voiceWaveform.draw(ctx, w * 0.5, 32, 22, accent);
+    if (frame?.primaryFace?.enrolledName) this.biometricTag(ctx, w, h, frame.primaryFace);
+    this.tools?.drawRadial(ctx);
+    if (recorder.isRecording) this.recordingBadge(ctx, w);
     ctx.globalAlpha = 1;
   }
 
