@@ -10,7 +10,7 @@ import { toast } from "../hud/toasts.js";
 import { sfx } from "../audio/sfx.js";
 import { appState } from "../state.js";
 
-const OBJECT_TYPES = ["arc_reactor", "engine", "earth", "cube", "sphere"];
+const OBJECT_TYPES = ["earth", "engine", "cube", "sphere"];
 
 export class ToolsManager {
   constructor(scene) {

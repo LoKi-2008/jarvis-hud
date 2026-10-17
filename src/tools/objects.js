@@ -15,7 +15,7 @@ export class HolographicObjects {
     this.scene.add(this.group);
     this.group.position.set(0, 0, 0);
 
-    this.currentType = "arc_reactor";
+    this.currentType = "earth";
     this.currentModel = null;
     this.models = new Map();
 
@@ -32,7 +32,7 @@ export class HolographicObjects {
     this.rotationVel = new THREE.Vector3(0, 0.005, 0);
 
     this.initBuiltins();
-    this.select("arc_reactor");
+    this.select("earth");
 
     bus.on("twohand-scale", (factor) => {
       if (this.currentModel) {
@@ -52,7 +52,7 @@ export class HolographicObjects {
     this.models.set("sphere", this.createSphere());
     this.models.set("earth", this.createEarth());
     this.models.set("engine", this.createEngine());
-    this.models.set("arc_reactor", this.createArcReactor());
+    // arc reactor removed
   }
 
   createCube() {
@@ -180,48 +180,7 @@ export class HolographicObjects {
     return { group, parts, name: "TURBOFAN ENGINE MK-IV" };
   }
 
-  createArcReactor() {
-    const group = new THREE.Group();
-    const glowCyan = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.9 });
-    const copperMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.85 });
-    const wireMat = new THREE.MeshBasicMaterial({ color: 0x7ef9ff, wireframe: true, transparent: true, opacity: 0.6 });
-
-    // 1. Outer Palladium Casing Ring
-    const outerRing = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.035, 16, 48), glowCyan);
-    group.add(outerRing);
-
-    // 2. 10 Induction Coils
-    const coilsGroup = new THREE.Group();
-    for (let i = 0; i < 10; i++) {
-      const a = (i / 10) * Math.PI * 2;
-      const coil = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.04), copperMat);
-      coil.position.set(Math.cos(a) * 0.25, Math.sin(a) * 0.25, 0);
-      coil.rotation.z = a;
-      coilsGroup.add(coil);
-    }
-    group.add(coilsGroup);
-
-    // 3. Middle Focus Ring
-    const midRing = new THREE.Mesh(new THREE.RingGeometry(0.12, 0.18, 32), wireMat);
-    midRing.position.z = 0.02;
-    group.add(midRing);
-
-    // 4. Central Repulsor Core
-    const core = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.08, 0.08, 0.05, 32),
-      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 })
-    );
-    core.rotation.x = Math.PI / 2;
-    group.add(core);
-
-    const parts = [
-      { mesh: outerRing, origin: new THREE.Vector3(0, 0, 0), dir: new THREE.Vector3(0, 0, -0.2) },
-      { mesh: coilsGroup, origin: new THREE.Vector3(0, 0, 0), dir: new THREE.Vector3(0, 0.25, 0.1) },
-      { mesh: midRing, origin: new THREE.Vector3(0, 0, 0.02), dir: new THREE.Vector3(0, 0, 0.25) },
-      { mesh: core, origin: new THREE.Vector3(0, 0, 0), dir: new THREE.Vector3(0, 0, 0.4) },
-    ];
-    return { group, parts, name: "ARC REACTOR MK-L" };
-  }
+  createArcReactor() { return this.createEarth(); }
 
   loadGLB(urlOrBuffer) {
     sfx.alert();

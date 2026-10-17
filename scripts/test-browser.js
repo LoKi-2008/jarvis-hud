@@ -66,40 +66,24 @@ async function run() {
   await send("Runtime.enable");
   await send("Page.navigate", { url: "http://localhost:5173/" });
 
-  console.log("Waiting 6 seconds for boot sequence...");
-  await new Promise((r) => setTimeout(r, 6000));
+  console.log("Waiting 3 seconds for instant boot...");
+  await new Promise((r) => setTimeout(r, 3000));
 
-  // Test executing a command via text command bar
-  console.log("Simulating command bar input: 'jarvis, status'...");
-  await send("Runtime.evaluate", {
-    expression: `
-      const form = document.getElementById("cmd-form");
-      const input = document.getElementById("cmd-input");
-      form.classList.remove("hidden");
-      input.value = "jarvis, status";
-      form.dispatchEvent(new Event("submit", { cancelable: true }));
-    `
-  });
-
-  await new Promise((r) => setTimeout(r, 2000));
-
-  // Check state and panels
   const res = await send("Runtime.evaluate", {
     expression: `({
       title: document.title,
+      bootHidden: document.getElementById('boot').classList.contains('hidden'),
       panelsCount: document.querySelectorAll('.hud-panel').length,
-      clockText: document.getElementById('chrono-local')?.innerText,
-      notepadPresent: Boolean(document.getElementById('jarvis-notepad')),
-      toastText: document.querySelector('.toast')?.innerText
+      clockText: document.getElementById('chrono-local')?.innerText
     })`,
     returnByValue: true
   });
-  console.log("App Evaluation:", res?.result?.value);
+  console.log("App Status:", res?.result?.value);
 
   const shot = await send("Page.captureScreenshot", { format: "png" });
   if (shot?.data) {
-    fs.writeFileSync("test-screenshot-tools.png", Buffer.from(shot.data, "base64"));
-    console.log("Screenshot written to test-screenshot-tools.png, size:", fs.statSync("test-screenshot-tools.png").size);
+    fs.writeFileSync("test-screenshot-fast.png", Buffer.from(shot.data, "base64"));
+    console.log("Screenshot written to test-screenshot-fast.png, size:", fs.statSync("test-screenshot-fast.png").size);
   }
 
   ws.close();

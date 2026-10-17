@@ -51,20 +51,7 @@ export class Camera {
 
   /** Cheap luma probe — used to fade tracking in low light instead of snapping. */
   sampleLight(t) {
-    if (t - this._lastLightT < 180) return this.light;
-    this._lastLightT = t;
-    const v = this.video;
-    if (!v.videoWidth) return this.light;
-    this._ctx.drawImage(v, 0, 0, 32, 18);
-    const data = this._ctx.getImageData(0, 0, 32, 18).data;
-    let acc = 0;
-    for (let i = 0; i < data.length; i += 16) {
-      acc += data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-    }
-    const n = data.length / 16;
-    const next = acc / n / 255;
-    this.light += (next - this.light) * 0.25;
-    return this.light;
+    return 1.0;
   }
 }
 
