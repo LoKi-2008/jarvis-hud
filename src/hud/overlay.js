@@ -25,6 +25,8 @@ export class HudOverlay {
     this.ring = 0;
     this.hex = 0;
     this.alpha = 1;
+    this.trans = 0;
+    this.pulse = 0;
   }
 
   resize(w, h) {
@@ -62,8 +64,54 @@ export class HudOverlay {
     this.rings(ctx, w, h, accent, frame);
     this.radarSweep(ctx, w, h, accent);
     this.readouts(ctx, w, h, accent);
+    if (appState.mode === "COMBAT") this.combat(ctx, w, h, frame);
+    if (appState.mode === "PARTY") {
+      ctx.globalAlpha = 0.12 * this.pulse;
+      ctx.fillStyle = accent;
+      ctx.fillRect(0, 0, w, h);
+    }
+    if (this.trans > 0) {
+      ctx.globalAlpha = this.trans * 0.35;
+      ctx.fillStyle = accent;
+      ctx.fillRect(0, 0, w, h);
+      this.trans *= 0.9;
+    }
     if (frame?.light < 0.18) this.lowLight(ctx, w, h);
     ctx.globalAlpha = 1;
+  }
+
+  flash() {
+    this.trans = 1;
+  }
+
+  combat(ctx, w, h, frame) {
+    ctx.save();
+    ctx.strokeStyle = "#FF1744";
+    ctx.fillStyle = "#FF1744";
+    ctx.font = "11px Share Tech Mono, monospace";
+    const boxes = [];
+    if (frame?.primaryFace?.landmarks) {
+      const b = bounds(frame.primaryFace.landmarks);
+      boxes.push({ ...b, label: "BIOMETRIC TARGET", score: 0.91 });
+    }
+    if (frame?.pose?.landmarks) {
+      const b = bounds(frame.pose.landmarks);
+      boxes.push({ ...b, label: "HOSTILE?  UNCONFIRMED", score: 0.64 });
+    }
+    for (const o of frame?.objects || []) {
+      boxes.push({ x: o.x, y: o.y, w: o.w, h: o.h, label: o.label.toUpperCase(), score: o.score });
+    }
+    for (const b of boxes) {
+      const x = b.x * w;
+      const y = b.y * h;
+      const bw = b.w * w;
+      const bh = b.h * h;
+      ctx.globalAlpha = 0.9;
+      ctx.strokeRect(x, y, bw, bh);
+      reticle(ctx, x + bw / 2, y + bh / 2, 16);
+      ctx.fillText(`${b.label}  ${(b.score * 100).toFixed(0)}%  THREAT`, x, y - 6);
+    }
+    ctx.restore();
   }
 
   hexGrid(ctx, w, h, accent) {
@@ -231,6 +279,33 @@ function hex(ctx, x, y, r) {
     else ctx.lineTo(px, py);
   }
   ctx.closePath();
+  ctx.stroke();
+}
+
+function bounds(lm) {
+  let minX = 1;
+  let minY = 1;
+  let maxX = 0;
+  let maxY = 0;
+  for (let i = 0; i < lm.length; i += 3) {
+    const p = lm[i];
+    if (p.x < minX) minX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y > maxY) maxY = p.y;
+  }
+  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+}
+
+function reticle(ctx, x, y, r) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x - r * 1.6, y);
+  ctx.lineTo(x + r * 1.6, y);
+  ctx.moveTo(x, y - r * 1.6);
+  ctx.lineTo(x, y + r * 1.6);
   ctx.stroke();
 }
 

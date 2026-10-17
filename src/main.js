@@ -15,6 +15,10 @@ import { gestures } from "./gestures/recognizer.js";
 import { runCalibration } from "./gestures/calibration.js";
 import { toast } from "./hud/toasts.js";
 import { HoloScene } from "./holograms/scene.js";
+import { goMode, modeFromKey } from "./modes/machine.js";
+import { coco } from "./vision/coco.js";
+import { beats } from "./audio/analyser.js";
+import { MODES } from "./config.js";
 
 const camera = new Camera();
 const vision = new VisionEngine();
@@ -48,6 +52,7 @@ function render(t) {
     latestFrame.light = camera.sampleLight(t);
     latestFrame.quality = quality.label;
   }
+  hud.pulse = beats.update(t);
   fx.draw(camera.video, t, quality.level);
   hud.draw(t, latestFrame);
   debug.draw(latestFrame, { fps: f, quality: quality.label });
@@ -72,6 +77,11 @@ async function bootVision() {
     latestFrame = frame;
     live.frame = frame;
     gestures.update(frame);
+    if ((appState.cocoOn || appState.mode === "COMBAT") && quality.runCoco) {
+      coco.tick(camera.video, frame.t).then((items) => {
+        frame.objects = items;
+      });
+    }
     const handsOn = frame.hands.some((h) => h.present);
     if (handsWereOn && !handsOn) toast("Tracking lost", "warn");
     handsWereOn = handsOn;
@@ -94,6 +104,15 @@ function bindKeys() {
       else document.exitFullscreen().catch(() => {});
     }
     if (e.key === "m" || e.key === "M") appState.muted = !appState.muted;
+    if (e.key >= "1" && e.key <= "7") {
+      modeFromKey(e.key);
+      hud.flash();
+    }
+  });
+  bus.on("mode", () => hud.flash());
+  document.getElementById("opt-coco").addEventListener("change", (e) => {
+    appState.cocoOn = e.target.checked;
+    if (appState.cocoOn) coco.ensure();
   });
   document.getElementById("opt-debug").addEventListener("change", (e) => {
     appState.debug = e.target.checked;
@@ -122,6 +141,7 @@ async function main() {
     appState.booted = true;
     await runCalibration(() => live.frame);
     toast("Calibration complete");
+    goMode(MODES.ACTIVE);
   } catch {
     /* permission overlay already visible */
   }

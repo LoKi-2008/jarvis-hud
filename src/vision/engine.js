@@ -6,6 +6,7 @@ import {
   GestureRecognizer,
 } from "@mediapipe/tasks-vision";
 import { CONFIG } from "../config.js";
+import { appState } from "../state.js";
 import { LandmarkSmoother } from "../utils/oneEuro.js";
 import { clamp } from "../utils/math.js";
 import { createVisionFrame } from "./frame.js";
@@ -101,7 +102,12 @@ export class VisionEngine {
     if (!this.running) return;
     this._timer = requestAnimationFrame(this.loop);
     const t = performance.now();
-    const minDt = this.quality.level === 0 ? 66 : 1000 / CONFIG.inference.targetHz;
+    const minDt =
+      appState.mode === "STANDBY"
+        ? 110
+        : this.quality.level === 0
+          ? 66
+          : 1000 / CONFIG.inference.targetHz;
     if (t - this.lastInfer < minDt || this._busy) return;
     if (!this.video || this.video.readyState < 2) return;
     this._busy = true;
