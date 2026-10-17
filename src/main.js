@@ -15,10 +15,12 @@ import { gestures } from "./gestures/recognizer.js";
 import { runCalibration } from "./gestures/calibration.js";
 import { toast } from "./hud/toasts.js";
 import { HoloScene } from "./holograms/scene.js";
-import { goMode, modeFromKey } from "./modes/machine.js";
+import { goMode, modeFromKey, ORDER } from "./modes/machine.js";
 import { coco } from "./vision/coco.js";
 import { beats } from "./audio/analyser.js";
 import { MODES } from "./config.js";
+import { ToolsManager } from "./tools/manager.js";
+import { VoiceListener } from "./voice/listener.js";
 
 const camera = new Camera();
 const vision = new VisionEngine();
@@ -28,6 +30,12 @@ const fx = new FxPass();
 const quality = new QualityGovernor();
 const fps = new FpsMeter();
 const holo = new HoloScene();
+
+// Instantiate Tools & Voice engines
+const tools = new ToolsManager(holo.scene);
+holo.setTools(tools);
+hud.setTools(tools);
+const voice = new VoiceListener(tools);
 
 export const live = { frame: null };
 let latestFrame = null;
@@ -76,6 +84,7 @@ async function bootVision() {
   vision.onFrame = (frame) => {
     latestFrame = frame;
     live.frame = frame;
+    window.__latestFrame = frame;
     gestures.update(frame);
     if ((appState.cocoOn || appState.mode === "COMBAT") && quality.runCoco) {
       coco.tick(camera.video, frame.t).then((items) => {
@@ -90,10 +99,32 @@ async function bootVision() {
   vision.start(camera.video);
 }
 
+function bindGestures() {
+  bus.on("gesture", (ev) => {
+    if (ev.name === "swipe_left") {
+      const idx = ORDER.indexOf(appState.mode);
+      const next = ORDER[(idx + 1) % ORDER.length];
+      goMode(next);
+    } else if (ev.name === "swipe_right") {
+      const idx = ORDER.indexOf(appState.mode);
+      const prev = ORDER[(idx - 1 + ORDER.length) % ORDER.length];
+      goMode(prev);
+    } else if (ev.name === "swipe_down") {
+      tools.panels.toggleAll();
+    } else if (ev.name === "swipe_up") {
+      tools.recorder.takeScreenshot();
+    } else if (ev.name === "thumbs_up") {
+      tools.cycleObject();
+    } else if (ev.name === "peace") {
+      tools.objects.toggleExplode();
+    }
+  });
+}
+
 function bindKeys() {
   window.addEventListener("pointerdown", () => sfx.unlock(), { once: true });
   window.addEventListener("keydown", (e) => {
-    if (e.target instanceof HTMLInputElement) return;
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
     sfx.unlock();
     if (e.key === "d" || e.key === "D") {
       appState.debug = !appState.debug;
@@ -133,6 +164,7 @@ async function main() {
   fitCanvases();
   window.addEventListener("resize", fitCanvases);
   bindKeys();
+  bindGestures();
   requestAnimationFrame(render);
   try {
     await bootVision();
@@ -149,4 +181,4 @@ async function main() {
 
 main();
 
-export { camera, vision, quality, hud, latestFrame, CONFIG };
+export { camera, vision, quality, hud, tools, voice, latestFrame, CONFIG };
